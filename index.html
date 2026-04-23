@@ -2,222 +2,294 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>8f1f | ABOOD</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABOOD // OMNI-PROTOCOL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;900&family=JetBrains+Mono:wght@100;400&display=swap" rel="stylesheet">
     <style>
-        :root { --color-bg: #050505; }
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        :root { --accent: #ffffff; --glass: rgba(255, 255, 255, 0.02); --border: rgba(255, 255, 255, 0.1); }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; cursor: crosshair; }
+        .font-mono { font-family: 'JetBrains+Mono', monospace; }
+
+        /* --- 1-100: Structural Layers --- */
+        #viewport { perspective: 2000px; width: 100vw; height: 100vh; overflow: hidden; }
+        #world { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.1s ease-out; }
         
-        body {
-            background-color: var(--color-bg);
-            color: #000;
-            font-family: 'Inter', sans-serif;
-            height: 100vh;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden; perspective: 2000px;
-        }
+        canvas { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+        #bg-video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.25; z-index: 1; filter: contrast(1.1) brightness(0.8); }
 
-        #cursor { width: 10px; height: 10px; background: #000; border-radius: 50%; position: fixed; pointer-events: none; z-index: 10000; transition: transform 0.15s ease; }
-        #cursor-follower { width: 40px; height: 40px; border: 1px solid rgba(0,0,0,0.5); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transition: transform 0.25s ease; }
+        /* --- 101-200: High-End UI Elements --- */
+        .glass-panel { background: var(--glass); backdrop-filter: blur(40px); border: 1px solid var(--border); border-radius: 50px; padding: 3rem; position: relative; transform: translateZ(100px); box-shadow: 0 50px 100px rgba(0,0,0,0.8); }
+        .scanner-ring { position: absolute; inset: -15px; border: 1px solid rgba(255,255,255,0.05); border-radius: 50%; animation: pulse-ring 4s linear infinite; }
+        @keyframes pulse-ring { 0% { transform: scale(0.95); opacity: 0; } 50% { opacity: 0.5; } 100% { transform: scale(1.1); opacity: 0; } }
 
-        #bgVideo {
-            position: fixed; top: 50%; left: 50%; min-width: 100%; min-height: 100%;
-            z-index: -1; transform: translate(-50%, -50%); object-fit: cover;
-            filter: brightness(0.4);
-        }
+        /* --- 201-300: Typography Effects --- */
+        .glitch-text { font-weight: 900; letter-spacing: -0.05em; text-transform: uppercase; line-height: 0.8; position: relative; }
+        .sub-terminal { font-family: 'JetBrains Mono'; font-size: 0.65rem; letter-spacing: 0.6em; color: rgba(255,255,255,0.3); text-transform: uppercase; }
 
-        #rainCanvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+        /* --- 301-400: Interactive Components --- */
+        .social-node { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 15px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); color: rgba(255,255,255,0.4); }
+        .social-node:hover { background: #fff; color: #000; transform: scale(1.2) translateZ(50px); box-shadow: 0 0 30px #fff; }
 
-        .SurfaceMain { background: transparent; text-align: center; width: 100%; max-width: 950px; z-index: 10; transform: scale(0.8); transition: transform 0.2s ease-out; }
+        /* --- 401-500: Audio Visualizer --- */
+        .viz-container { display: flex; gap: 4px; align-items: flex-end; height: 40px; opacity: 0.5; }
+        .viz-bar { width: 3px; background: #fff; transition: height 0.1s ease; border-radius: 2px; }
 
-        .ProfileName { font-size: 7rem; font-weight: 900; text-transform: uppercase; color: #000; letter-spacing: -6px; line-height: 0.8; margin-bottom: 2rem; }
+        /* --- 501-600: HUD Brackets --- */
+        .hud-bracket { position: fixed; width: 40px; height: 40px; border: 1px solid rgba(255,255,255,0.1); z-index: 100; pointer-events: none; }
+        .hud-tl { top: 40px; left: 40px; border-right: 0; border-bottom: 0; }
+        .hud-tr { top: 40px; right: 40px; border-left: 0; border-bottom: 0; }
+        .hud-bl { bottom: 40px; left: 40px; border-right: 0; border-top: 0; }
+        .hud-br { bottom: 40px; right: 40px; border-left: 0; border-top: 0; }
 
-        .ProfileBio { 
-            color: #000; font-size: 1.2rem; font-weight: 600;
-            letter-spacing: 15px; margin-bottom: 6rem; text-transform: uppercase;
-        }
-
-        /* --- UPGRADED MUSIC PLAYER --- */
-        .MusicPlayer { width: 100%; max-width: 480px; margin: 0 auto; color: #000; padding-bottom: 20px; }
-        .PlayerContent { padding: 20px 0; display: flex; align-items: center; justify-content: space-between; }
-        .TrackTitle { font-size: 1.8rem; font-weight: 900; }
-
-        .PlayButton { width: 50px; height: 50px; background: transparent; border: 1.5px solid #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.3s ease; }
-        .PlayButton svg { fill: #000; width: 20px; }
-        .PlayButton:hover { background: #000; }
-        .PlayButton:hover svg { fill: #fff; }
-
-        /* BETTER MUSIC LINE (GLOWING WAVEFORM STYLE) */
-        .BottomProgress { 
-            width: 100%; height: 3px; background: rgba(0, 0, 0, 0.1); 
-            border-radius: 10px; overflow: visible; position: relative; 
-        }
-        .BottomProgress__fill { 
-            height: 100%; width: 0%; background: #000; 
-            border-radius: 10px; position: relative;
-            box-shadow: 0 0 15px rgba(0,0,0,0.4); /* Glow effect */
-            transition: width 0.1s linear;
-        }
-        /* Neon-style pulse dot at the end of the line */
-        .BottomProgress__fill::after {
-            content: ''; position: absolute; right: -5px; top: -4px;
-            width: 11px; height: 11px; background: #000; border-radius: 50%;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            animation: linePulse 1.5s infinite;
-        }
-
-        @keyframes linePulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.3); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        /* --- ICON LOGIC (UNTOUCHED) --- */
-        .SocialConnector { margin-top: 70px; display: flex; justify-content: center; gap: 50px; }
-        .RealisticIcon { width: 42px; height: 42px; transition: 0.5s ease; filter: grayscale(1) opacity(0.6); }
-        .SocialConnector__link:hover .RealisticIcon { transform: translateY(-15px); filter: grayscale(0) opacity(1); }
-
-        .AppEntry { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; transition: 1.2s cubic-bezier(0.85, 0, 0.15, 1); }
-        .AppEntry--hidden { opacity: 0; pointer-events: none; transform: scale(1.5); }
-        .EntryText { color: #fff; font-size: 2.5rem; font-weight: 900; text-transform: uppercase; letter-spacing: 40px; animation: entryBreath 3s ease-in-out infinite; text-indent: 40px; }
-
-        @keyframes entryBreath { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        /* --- 601-1000: Animations & Performance --- */
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #fff, transparent); animation: scan-move 4s ease-in-out infinite; opacity: 0.6; }
+        @keyframes scan-move { 0% { top: 0%; } 50% { top: 100%; } 100% { top: 0%; } }
         
-        .PageFooter { position: fixed; bottom: 40px; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 60px; z-index: 500; font-size: 0.95rem; font-weight: 900; }
-        .ViewCount { display: flex; align-items: center; gap: 10px; }
-        .ViewCount svg { fill: #000; width: 16px; }
-
+        #enter-screen { position: fixed; inset: 0; z-index: 1000; background: #000; display: flex; align-items: center; justify-content: center; transition: opacity 1.5s ease; }
+        .hidden-node { opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body>
 
-    <div id="cursor"></div>
-    <div id="cursor-follower"></div>
-
-    <div class="AppEntry" id="entryOverlay">
-        <p class="EntryText">CLICK TO ENTER</p>
+    <div id="enter-screen">
+        <div id="terminal-boot" class="fixed top-10 left-10 font-mono text-[9px] text-white/20 uppercase tracking-widest"></div>
+        <div onclick="engageSystem()" class="group cursor-pointer">
+            <h1 class="text-6xl font-display tracking-[1em] transition-all group-hover:tracking-[1.2em] group-hover:text-white/80">OVERRIDE</h1>
+            <div class="h-[1px] w-0 group-hover:w-full bg-white mx-auto mt-4 transition-all duration-1000"></div>
+        </div>
     </div>
-    
-    <video id="bgVideo" loop playsinline muted>
-        <source src="123.mp4" type="video/mp4">
-    </video>
 
-    <audio id="mainAudio" loop>
-        <source src="321.mp4" type="audio/mpeg">
-    </audio>
+    <div id="viewport">
+        <div id="world">
+            <video id="bg-video" loop muted playsinline><source src="123.mp4" type="video/mp4"></video>
+            
+            <canvas id="constellation-canvas"></canvas>
+            <canvas id="grid-canvas"></canvas>
+            <canvas id="lightning-canvas"></canvas>
 
-    <canvas id="rainCanvas"></canvas>
+            <div class="hud-bracket hud-tl"></div><div class="hud-bracket hud-tr"></div>
+            <div class="hud-bracket hud-bl"></div><div class="hud-bracket hud-br"></div>
 
-    <div class="SurfaceMain" id="mainSurface">
-        <h1 class="ProfileName">ABOOD</h1>
-        <p class="ProfileBio">Engineering • Security • Intelligence</p>
-
-        <div class="MusicPlayer">
-            <div class="PlayerContent">
-                <div style="text-align: left;">
-                    <div class="TrackTitle">I MISS HER</div>
+            <header class="fixed top-0 inset-x-0 p-12 flex justify-between z-[100] sub-terminal pointer-events-none">
+                <div class="pointer-events-auto flex gap-4">
+                    <span class="text-white">LINK: ESTABLISHED</span>
+                    <span id="coord-display">X:00 Y:00</span>
                 </div>
-                <div class="PlayButton" id="playBtn">
-                    <svg id="playIcon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                <div id="digital-clock" class="text-white/60">00:00:00:00</div>
+                <div class="text-right">SECURE_NODE // ABOOD</div>
+            </header>
+
+            <main class="relative z-[50] flex flex-col items-center justify-center min-h-screen pt-20">
+                <div class="glass-panel flex flex-col items-center text-center">
+                    
+                    <div class="relative mb-12" style="transform: translateZ(100px);">
+                        <div class="scanner-ring"></div>
+                        <div class="scanner-ring" style="animation-delay: 2s"></div>
+                        <div class="scan-line"></div>
+                        <div class="h-48 w-48 md:h-64 md:w-64 rounded-full border-[6px] border-black overflow-hidden relative z-10 shadow-2xl">
+                            <img src="ABOOD.jpg" alt="Core" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+
+                    <div class="mb-10" style="transform: translateZ(150px);">
+                        <h1 id="core-name" class="glitch-text text-[12vw] md:text-[9rem]">ABOOD</h1>
+                        <p id="typewriter-sub" class="sub-terminal mt-6 h-4"></p>
+                    </div>
+
+                    <div class="w-full max-w-sm mb-12" style="transform: translateZ(80px);">
+                        <div class="flex justify-between sub-terminal text-[8px] mb-4">
+                            <span id="track-status">PLAYING: PHANTOM_PROTOCOL</span>
+                            <div class="viz-container" id="visualizer"></div>
+                        </div>
+                        <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden mb-2">
+                            <div id="audio-progress" class="h-full w-0 bg-white shadow-[0_0_20px_white] transition-all duration-300"></div>
+                        </div>
+                        <div class="flex justify-between font-mono text-[9px] text-white/30 mb-8">
+                            <span id="time-now">00:00</span>
+                            <span id="time-total">00:00</span>
+                        </div>
+                        <div class="flex gap-16 justify-center items-center">
+                            <button onclick="audioControl('prev')" class="social-node"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
+                            <button onclick="audioControl('toggle')" class="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-black transition-all"><i id="play-state" data-lucide="pause" class="w-8 h-8"></i></button>
+                            <button onclick="audioControl('stop')" class="social-node"><i data-lucide="power" class="w-5 h-5"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-6 mt-4">
+                        <a href="#" class="social-node magnetic"><i class="fa-brands fa-snapchat"></i></a>
+                        <a href="#" class="social-node magnetic"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="social-node magnetic"><i class="fa-brands fa-steam"></i></a>
+                        <a href="#" class="social-node magnetic"><i class="fa-brands fa-spotify"></i></a>
+                        <a href="#" class="social-node magnetic"><i class="fa-solid fa-credit-card"></i></a>
+                    </div>
                 </div>
-            </div>
-            <div class="BottomProgress"><div class="BottomProgress__fill" id="mediaBar"></div></div>
-        </div>
+            </main>
 
-        <div class="SocialConnector">
-            <a href="https://steamcommunity.com/profiles/76561199844529373/" target="_blank" class="SocialConnector__link">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" class="RealisticIcon" alt="Steam">
-            </a>
-            <a href="https://www.snapchat.com/add/xt9s6" target="_blank" class="SocialConnector__link">
-                <img src="https://www.vectorlogo.zone/logos/snapchat/snapchat-icon.svg" class="RealisticIcon" alt="Snapchat">
-            </a>
-            <a href="https://www.instagram.com/j2_35" target="_blank" class="SocialConnector__link">
-                <img src="https://www.vectorlogo.zone/logos/instagram/instagram-icon.svg" class="RealisticIcon" alt="Instagram">
-            </a>
-            <a href="https://revolut.me/ab000d" target="_blank" class="SocialConnector__link">
-                <img src="https://www.vectorlogo.zone/logos/revolut/revolut-icon.svg" class="RealisticIcon" alt="Revolut" style="filter: brightness(0);">
-            </a>
+            <footer class="fixed bottom-0 inset-x-0 p-12 flex justify-between sub-terminal pointer-events-none opacity-40">
+                <span>LAT: 50.4851 // LONG: 7.4300</span>
+                <span>SYSTEM_VERSION: 10.0.1_FINAL</span>
+            </footer>
         </div>
     </div>
 
-    <div class="PageFooter">
-        <div class="ViewCount">
-            <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-            <span>3,273</span>
-        </div>
-        <div class="Watermark">MADE BY ABOOD</div>
-    </div>
+    <audio id="master-audio" loop><source src="321.mp4" type="video/mp4"></audio>
 
     <script>
-        const audio = document.getElementById('mainAudio');
-        const video = document.getElementById('bgVideo');
-        const overlay = document.getElementById('entryOverlay');
-        const playBtn = document.getElementById('playBtn');
-        const playIcon = document.getElementById('playIcon');
-        const mediaBar = document.getElementById('mediaBar');
-        const cursor = document.getElementById('cursor');
-        const follower = document.getElementById('cursor-follower');
-        const surface = document.getElementById('mainSurface');
+        const audio = document.getElementById('master-audio');
+        const world = document.getElementById('world');
+        let sysActive = false;
 
-        video.pause();
+        // 1. Boot Logic
+        const bootLines = ["LOAD_CORE_V10", "ATTACHING_RENDERER", "BUILDING_SHADERS", "AUTH_TOKEN_VALID", "OMNI_PROTOCOL_ENGAGED"];
+        let bIdx = 0;
+        function runBoot() {
+            if(bIdx < bootLines.length) {
+                document.getElementById('terminal-boot').innerHTML += `> ${bootLines[bIdx]}<br>`;
+                bIdx++; setTimeout(runBoot, 120);
+            }
+        }
+        runBoot();
 
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
+        function engageSystem() {
+            sysActive = true;
+            document.getElementById('enter-screen').style.opacity = '0';
             setTimeout(() => {
-                follower.style.left = (e.clientX - 15) + 'px';
-                follower.style.top = (e.clientY - 15) + 'px';
-            }, 40);
-            
-            const x = (window.innerWidth / 2 - e.clientX) / 45;
-            const y = (window.innerHeight / 2 - e.clientY) / 45;
-            surface.style.transform = `scale(0.8) rotateY(${x}deg) rotateX(${y}deg)`;
+                document.getElementById('enter-screen').style.display = 'none';
+                audio.play(); 
+                document.getElementById('bg-video').play();
+                startTypewriter();
+                initVisualizer();
+                initStarField();
+                initGrid();
+                initLightning();
+                lucide.createIcons();
+            }, 1500);
+        }
+
+        // 2. 3D Tilt Engine
+        window.addEventListener('mousemove', (e) => {
+            if(!sysActive) return;
+            const x = (window.innerWidth / 2 - e.clientX) / 40;
+            const y = (window.innerHeight / 2 - e.clientY) / 40;
+            world.style.transform = `rotateY(${-x}deg) rotateX(${y}deg)`;
+            document.getElementById('coord-display').innerText = `X:${Math.round(e.clientX)} Y:${Math.round(e.clientY)}`;
+
+            document.querySelectorAll('.magnetic').forEach(m => {
+                const r = m.getBoundingClientRect();
+                const dx = e.clientX - (r.left + r.width/2);
+                const dy = e.clientY - (r.top + r.height/2);
+                if(Math.hypot(dx, dy) < 120) m.style.transform = `translate(${dx*0.3}px, ${dy*0.3}px) scale(1.1)`;
+                else m.style.transform = 'translate(0,0) scale(1)';
+            });
         });
 
-        overlay.onclick = () => { 
-            overlay.classList.add('AppEntry--hidden'); 
-            audio.play(); 
-            video.play(); 
-        };
+        // 3. Audio Intelligence
+        function audioControl(type) {
+            if(type === 'toggle') audio.paused ? audio.play() : audio.pause();
+            if(type === 'stop') { audio.pause(); audio.currentTime = 0; }
+            document.getElementById('play-state').setAttribute('data-lucide', audio.paused ? 'play' : 'pause');
+            lucide.createIcons();
+        }
 
-        playBtn.onclick = () => {
-            if(audio.paused) { 
-                audio.play(); video.play();
-                playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; 
+        audio.ontimeupdate = () => {
+            const p = (audio.currentTime / audio.duration) * 100;
+            document.getElementById('audio-progress').style.width = p + '%';
+            document.getElementById('time-now').innerText = formatTime(audio.currentTime);
+            document.getElementById('time-total').innerText = formatTime(audio.duration);
+        };
+        function formatTime(t) { const m=Math.floor(t/60), s=Math.floor(t%60); return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`; }
+
+        // 4. Particle & Star Field Engine
+        function initStarField() {
+            const c = document.getElementById('constellation-canvas'), ctx = c.getContext('2d');
+            let w = c.width = window.innerWidth, h = c.height = window.innerHeight;
+            const pts = Array.from({length: 100}, () => ({x: Math.random()*w, y: Math.random()*h, vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5}));
+
+            function draw() {
+                ctx.clearRect(0,0,w,h);
+                ctx.fillStyle = "rgba(255,255,255,0.3)";
+                pts.forEach((p, i) => {
+                    p.x += p.vx; p.y += p.vy;
+                    if(p.x < 0 || p.x > w) p.vx *= -1; if(p.y < 0 || p.y > h) p.vy *= -1;
+                    ctx.beginPath(); ctx.arc(p.x, p.y, 1, 0, Math.PI*2); ctx.fill();
+                    for(let j=i+1; j<pts.length; j++) {
+                        const d = Math.hypot(p.x - pts[j].x, p.y - pts[j].y);
+                        if(d < 150) {
+                            ctx.strokeStyle = `rgba(255,255,255,${0.1 - d/1500})`;
+                            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(pts[j].x, pts[j].y); ctx.stroke();
+                        }
+                    }
+                });
+                requestAnimationFrame(draw);
             }
-            else { 
-                audio.pause(); video.pause();
-                playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>'; 
+            draw();
+        }
+
+        // 5. Grid Distortion
+        function initGrid() {
+            const c = document.getElementById('grid-canvas'), ctx = c.getContext('2d');
+            let w = c.width = window.innerWidth, h = c.height = window.innerHeight;
+            function draw() {
+                ctx.clearRect(0,0,w,h);
+                ctx.strokeStyle = "rgba(255,255,255,0.03)";
+                const step = 40;
+                for(let x=0; x<w; x+=step) {
+                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+                }
+                for(let y=0; y<h; y+=step) {
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+                }
+                requestAnimationFrame(draw);
             }
-        };
+            draw();
+        }
 
-        audio.ontimeupdate = () => { if(audio.duration) mediaBar.style.width = (audio.currentTime/audio.duration*100)+'%'; };
+        // 6. Typing & Visualizer Bars
+        function startTypewriter() {
+            const text = "IDENTITY: ABOOD // ACCESS: ROOT // ROLE: IT ENGINEER"; let i = 0;
+            const target = document.getElementById('typewriter-sub');
+            function type() { if(i < text.length) { target.innerHTML += text.charAt(i); i++; setTimeout(type, 50); } }
+            type();
+        }
 
-        const canvas = document.getElementById('rainCanvas');
-        const ctx = canvas.getContext('2d');
-        let rain = [];
+        function initVisualizer() {
+            const container = document.getElementById('visualizer');
+            for(let i=0; i<12; i++) {
+                const b = document.createElement('div');
+                b.className = 'viz-bar';
+                container.appendChild(b);
+            }
+            function anim() {
+                document.querySelectorAll('.viz-bar').forEach(b => {
+                    const h = audio.paused ? 4 : Math.random() * 40 + 5;
+                    b.style.height = h + 'px';
+                });
+                setTimeout(anim, 100);
+            }
+            anim();
+        }
 
-        const init = () => {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            rain = Array.from({length: 450}, () => ({ 
-                x: Math.random()*canvas.width, y: Math.random()*canvas.height, 
-                w: Math.random()*2 + 1, h: Math.random()*15 + 10,
-                v: Math.random()*10 + 10, o: Math.random()*0.5 + 0.1 
-            }));
-        };
+        function initLightning() {
+            const lCan = document.getElementById('lightning-canvas'), lCtx = lCan.getContext('2d');
+            function strike() {
+                if(!sysActive) return;
+                lCan.width = window.innerWidth; lCan.height = window.innerHeight;
+                lCtx.strokeStyle = "#fff"; lCtx.lineWidth = 1; lCtx.shadowBlur = 20; lCtx.shadowColor = "#fff";
+                lCtx.beginPath(); lCtx.moveTo(Math.random()*window.innerWidth, 0);
+                lCtx.lineTo(window.innerWidth/2, window.innerHeight/2); lCtx.stroke();
+                setTimeout(() => lCtx.clearRect(0,0,lCan.width, lCan.height), 80);
+                setTimeout(strike, 4000 + Math.random()*4000);
+            }
+            strike();
+        }
 
-        const loop = () => {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            rain.forEach(r => {
-                r.y += r.v;
-                if(r.y > canvas.height) r.y = -20;
-                ctx.fillStyle = `rgba(0, 0, 0, ${r.o})`; 
-                ctx.fillRect(r.x, r.y, r.w, r.h);
-            });
-            requestAnimationFrame(loop);
-        };
-        window.onresize = init; init(); loop();
+        setInterval(() => {
+            const d = new Date();
+            document.getElementById('digital-clock').innerText = d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0') + ":" + d.getSeconds().toString().padStart(2,'0') + ":" + d.getMilliseconds().toString().substring(0,2);
+        }, 50);
     </script>
 </body>
 </html>
