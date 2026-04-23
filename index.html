@@ -49,7 +49,6 @@
         @keyframes scan-move { 0% { top: 0%; } 50% { top: 100%; } 100% { top: 0%; } }
         
         #enter-screen { position: fixed; inset: 0; z-index: 1000; background: #000; display: flex; align-items: center; justify-content: center; transition: opacity 1.5s ease; }
-        .hidden-node { opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -119,11 +118,11 @@
                     </div>
 
                     <div class="flex gap-6 mt-4">
-                        <a href="#" class="social-node magnetic"><i class="fa-brands fa-snapchat"></i></a>
-                        <a href="#" class="social-node magnetic"><i class="fa-brands fa-instagram"></i></a>
-                        <a href="#" class="social-node magnetic"><i class="fa-brands fa-steam"></i></a>
-                        <a href="#" class="social-node magnetic"><i class="fa-brands fa-spotify"></i></a>
-                        <a href="#" class="social-node magnetic"><i class="fa-solid fa-credit-card"></i></a>
+                        <a href="https://www.snapchat.com/add/xt9s6?share_id=HUYDyYVgF50&locale=en-US" target="_blank" class="social-node magnetic"><i class="fa-brands fa-snapchat"></i></a>
+                        <a href="https://www.instagram.com/j2_35?igsh=MTFtOGY3cG96bDQ4bw==" target="_blank" class="social-node magnetic"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="https://steamcommunity.com/profiles/76561199844529373/" target="_blank" class="social-node magnetic"><i class="fa-brands fa-steam"></i></a>
+                        <a href="https://open.spotify.com/track/7AQim7LbvFVZJE3O8TYgf2?si=e9f9dd2e973e4dec_" target="_blank" class="social-node magnetic"><i class="fa-brands fa-spotify"></i></a>
+                        <a href="https://revolut.me/ab000d" target="_blank" class="social-node magnetic"><i class="fa-solid fa-credit-card"></i></a>
                     </div>
                 </div>
             </main>
@@ -142,7 +141,6 @@
         const world = document.getElementById('world');
         let sysActive = false;
 
-        // 1. Boot Logic
         const bootLines = ["LOAD_CORE_V10", "ATTACHING_RENDERER", "BUILDING_SHADERS", "AUTH_TOKEN_VALID", "OMNI_PROTOCOL_ENGAGED"];
         let bIdx = 0;
         function runBoot() {
@@ -169,7 +167,6 @@
             }, 1500);
         }
 
-        // 2. 3D Tilt Engine
         window.addEventListener('mousemove', (e) => {
             if(!sysActive) return;
             const x = (window.innerWidth / 2 - e.clientX) / 40;
@@ -186,7 +183,6 @@
             });
         });
 
-        // 3. Audio Intelligence
         function audioControl(type) {
             if(type === 'toggle') audio.paused ? audio.play() : audio.pause();
             if(type === 'stop') { audio.pause(); audio.currentTime = 0; }
@@ -202,7 +198,6 @@
         };
         function formatTime(t) { const m=Math.floor(t/60), s=Math.floor(t%60); return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`; }
 
-        // 4. Particle & Star Field Engine
         function initStarField() {
             const c = document.getElementById('constellation-canvas'), ctx = c.getContext('2d');
             let w = c.width = window.innerWidth, h = c.height = window.innerHeight;
@@ -228,7 +223,6 @@
             draw();
         }
 
-        // 5. Grid Distortion
         function initGrid() {
             const c = document.getElementById('grid-canvas'), ctx = c.getContext('2d');
             let w = c.width = window.innerWidth, h = c.height = window.innerHeight;
@@ -247,7 +241,6 @@
             draw();
         }
 
-        // 6. Typing & Visualizer Bars
         function startTypewriter() {
             const text = "IDENTITY: ABOOD // ACCESS: ROOT // ROLE: IT ENGINEER"; let i = 0;
             const target = document.getElementById('typewriter-sub');
